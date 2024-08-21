@@ -1,0 +1,830 @@
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <conio.h>
+#include <ctype.h>
+
+// for struct use
+struct Car
+{
+    char carmodel[20];
+    char carmake[20];
+    char carplate[20];
+    float carprice;
+    int carmileage;
+};
+struct Client
+{
+    char clientname[30];
+    char clientIC[20];
+    char phoneNum[20];
+};
+struct Asset
+{
+    struct Car car;
+    struct Client client;
+    struct Asset *ptrnext;
+};
+
+// for sort use
+struct ArrayStore
+{
+    struct Asset *array;
+    struct RepairCar *array2;
+    int size;
+};
+
+//repair and maintenance struct
+struct RepairCar {
+	char rpClientname[30];
+	char rpCarplate [20];
+	char rpCarmake [20];
+	char rpCarmodel [20];
+	char Date_of_Service [20];
+	char Repair_Details [30];
+};
+
+
+struct InsuranceInfo {
+    char insuranceProvider[30];
+    char policyNumber[20];
+    float coverageAmount;
+};
+
+
+struct DriverInfo {
+    char driverName[30];
+    char driverLicense[20];
+    int age;
+};
+
+struct driver {
+
+    struct InsuranceInfo insurance_info;
+    struct DriverInfo driver_info;
+
+};
+
+// for linked list use
+#define TRUE 1
+#define FALSE 0
+void default_asset(char clientname[30], char clientIC[20], char phoneNum[20], char carplate[20], char carmodel[20], char carmake[20], float carprice, int carmileage);
+void update_bycarplate();
+void new_number();
+void new_number1();
+void list_number();
+void delete_record();
+void delete_bycarplate();
+void delete_beginning();
+int dequeueRepair(int);
+void search_bycarplate();
+void linkedlist_to_array(struct Asset *head, struct ArrayStore *store);
+void bubble_sort_price(struct ArrayStore *store);
+void bubble_sort_mileage(struct ArrayStore *store);
+void display_array(struct ArrayStore *store);
+void list_sort();
+void repairRegister();
+void Info();
+
+struct Asset *headptr, *newptr, *currentptr, *previousptr;
+struct RepairCar repair[20];
+struct InsuranceInfo insurance();
+
+void display(struct driver insurance, struct driver driverInfo);
+
+int main()
+{
+    headptr = NULL;
+
+    default_asset("Elly", "021110102645", "0124561028", "JNW2785", "Accord", "Toyota", 20125, 42355);
+    default_asset("John", "021110102545", "01145626128", "WWK1203", "Civic", "Honda", 25000, 17905);
+    default_asset("Johnny","800312104235","0106548525","CEV8927","CR-V","Honda",91800,111197);
+    default_asset("Aaron","740723103120","0167003245","BNN8116","Vios","Toyota",40800,110000);
+    default_asset("Cindy","920403109823","0121456382","AAU4730","Altis","Toyota",59800,80000);
+    default_asset("Kelvin","840218103452","0163241235","ANE5441","Myvi","Perodua",59900,4999);
+    default_asset("William","970520109420","01174568912","BRJ8241","Axia","Perodua",38600,5200);
+    default_asset("Kelly","940109105241","0123571231","JUE4427","Saga","Proton",23300,80000);
+    default_asset("Alicia","761218103941","0162335684","PQF2688","HR-V","Honda",86900,100000);
+    default_asset("Rachel","980322104528","0108462357","MAS2475","Camry","Toyota",30000,102000);
+
+    printf("Remote Asset Monitoring and Maintenance System\n");
+    printf("Enter your car details for monitoring and maintenance services\n");
+    printf("----------------------------------------------\n");
+
+    char ch;
+    int choice=TRUE;
+
+
+    while(choice==TRUE)
+
+    {
+        printf("\n\nE - Enter Information");
+        printf("\nU - Update by Car Plate Number");
+        printf("\nD - Delete Record");
+        printf("\nL - Display Records");
+        printf("\nF - Search");
+        printf("\nR - Repair and Maintenance");
+        printf("\nS - Sort Records");
+        printf("\nI - Info");
+        printf("\nX - Exit\n");
+        printf("\nEnter choice: ");
+        scanf(" %c",&ch);
+        ch=toupper(ch);
+        switch(ch)
+        {
+            case 'E':new_number();break;
+            case 'U':update_bycarplate();break;
+            case 'D':delete_record();break;
+            case 'L':list_number();break;
+            case 'F':search_bycarplate();break;
+            case 'R':repairRegister();break;
+            case 'S':list_sort(); break;
+            case 'I':Info(); break;
+            case 'X':choice=FALSE; break;
+
+            default: printf("\nEnter only one from the above");
+        }
+    }
+    return 0;
+
+}
+
+//setting default asset data
+void default_asset(char clientname[30], char clientIC[20], char phoneNum[20], char carplate[20], char carmodel[20], char carmake[20], float carprice, int carmileage){
+
+    newptr = (struct Asset *)malloc(sizeof(struct Asset));
+
+    strcpy(newptr->client.clientname, clientname);
+    strcpy(newptr->client.clientIC, clientIC);
+    strcpy(newptr->client.phoneNum, phoneNum);
+    strcpy(newptr->car.carplate, carplate);
+    strcpy(newptr->car.carmodel, carmodel);
+    strcpy(newptr->car.carmake, carmake);
+    newptr->car.carprice = carprice;
+    newptr->car.carmileage = carmileage;
+
+    if (headptr==NULL)
+    {
+        headptr=newptr;
+        newptr->ptrnext=NULL;
+    }
+
+    else
+    {
+        currentptr=headptr;
+
+        while(currentptr->ptrnext !=NULL)
+        {
+            currentptr=currentptr->ptrnext;
+        }
+
+        currentptr->ptrnext=newptr;
+        newptr->ptrnext=NULL;
+    }
+
+
+}
+
+void new_number() // insert at the end
+{
+    newptr=(struct Asset *)malloc(sizeof(struct Asset));
+
+    printf("\n--------------------------------------------------------------\n");
+    fflush(stdin);
+    printf("\nEnter Client Name: ");
+    scanf("%[^\n]s", newptr->client.clientname);
+    printf("Enter Client IC: ");
+    scanf("%s", newptr->client.clientIC);
+    printf("Enter Phone Number: ");
+    scanf("%s", newptr->client.phoneNum);
+    printf("Enter Car Plate: ");
+    scanf("%s", newptr->car.carplate);
+    printf("Enter Car Model: ");
+    scanf("%s", newptr->car.carmodel);
+    printf("Enter Car Make: ");
+    scanf("%s", newptr->car.carmake);
+    printf("Enter Car Price: ");
+    scanf("%f", &newptr->car.carprice);
+    fflush(stdin);
+    printf("Enter Car Mileage: ");
+    scanf("%d", &newptr->car.carmileage);
+    fflush(stdin);
+
+
+    if (headptr==NULL)
+    {
+        headptr=newptr;
+        newptr->ptrnext=NULL;
+    }
+
+    else
+    {
+        currentptr=headptr;
+
+        while(currentptr->ptrnext !=NULL)
+        {
+            currentptr=currentptr->ptrnext;
+        }
+
+        currentptr->ptrnext=newptr;
+        newptr->ptrnext=NULL;
+    }
+
+
+}
+
+//update car struct data
+void update_bycarplate(){
+	char input[50];
+    int i;
+
+    if (headptr == (struct Asset *)NULL){
+
+        printf("\nThe list is empty");
+        printf("\nPress Enter to continue.");
+    }
+    else{
+        printf("\nEnter the car plate that you want to update: ");
+        scanf("%s", input);
+
+        currentptr = headptr;
+        while (currentptr-> ptrnext != (struct Asset*)NULL){
+
+            if (strcmp(currentptr->car.carplate, input) == 0){
+                break;
+            }
+            else{
+
+                previousptr = currentptr;
+                currentptr = currentptr->ptrnext;}}
+
+        if (strcmp(currentptr->car.carplate, input)==0)
+        {
+            if(currentptr==headptr){
+
+                headptr=currentptr->ptrnext;
+                free(currentptr);}
+            else{
+                previousptr->ptrnext=currentptr->ptrnext;
+                free(currentptr);
+            }
+            printf("\nCar Plate Found !!!\n");
+
+            new_number1();
+
+        }
+        else{
+            printf("\nCar Plate is not in the list!");
+            printf("\nPress Enter to continue.\n");
+
+        }
+    }
+    getch();
+    
+}
+
+void new_number1() // push
+{
+    newptr=(struct Asset *)malloc(sizeof (struct Asset)); // pointer to a new
+    //	memory allocation
+
+    if (headptr==NULL)//node is empty?
+    {headptr=newptr; //first pointer point to first node
+        newptr->ptrnext=NULL; //first node pointer point to null
+    }
+
+    else
+    {
+        newptr->ptrnext=headptr;// new node pointer point to previous first node
+        headptr=newptr; // head point to new node,new node become first node
+
+    }
+
+    fflush(stdin);
+    printf("\nEnter Client Name: ");
+    scanf("%[^\n]s", newptr->client.clientname);
+    printf("Enter Client IC: ");
+    scanf("%s", newptr->client.clientIC);
+    printf("Enter Phone Number: ");
+    scanf("%s", newptr->client.phoneNum);
+    printf("Enter Car Plate: ");
+    scanf("%s", newptr->car.carplate);
+    printf("Enter Car Model: ");
+    scanf("%s", newptr->car.carmodel);
+    printf("Enter Car Make: ");
+    scanf("%s", newptr->car.carmake);
+    printf("Enter Car Price: ");
+    scanf("%f", &newptr->car.carprice);
+    fflush(stdin);
+    printf("Enter Car Mileage: ");
+    scanf("%d", &newptr->car.carmileage);
+    fflush(stdin);
+}
+
+void list_number()
+{
+    if (headptr==(struct Asset*)NULL) //empty list
+    {
+        printf("\nEmpty list");
+        return;
+    }
+
+
+    printf("\n");
+    printf("\nNo.   Client Name\tClient IC\tPhone Number\tCar Plate\tCar Model\tCar Make\tCar Price\tCar Mileage\n");
+    currentptr=headptr;
+    struct ArrayStore finalarray;
+
+    linkedlist_to_array(headptr, &finalarray);
+
+    display_array(&finalarray);
+
+    free(finalarray.array);
+
+}
+//delete the record
+void delete_record(){
+
+    char ch;
+    printf("\nD - Delete by Car Plate\n");
+    printf("\nQ - Delete at beginning\n");
+    printf("\nEnter choice: ");
+    scanf(" %c",&ch);
+    ch=toupper(ch);
+    switch(ch){
+
+        case 'D': delete_bycarplate();break;
+        case 'Q': delete_beginning();break;
+
+        default: printf("\nEnter only one from the above");}
+
+}
+//delete the record by car plate
+void delete_bycarplate()
+{
+    char input[10];
+
+    if (headptr==NULL)//node is empty?
+    {
+        printf("\n\nThe list is empty. Cannot delete!!!\n");//the list is empty
+    }
+
+    else
+    {
+        printf("\nEnter Car Plate Number to delete: ");
+        scanf("%s",input);
+
+        currentptr=headptr;
+
+        while(currentptr->ptrnext!=NULL)
+        {
+
+            if (strcmp(currentptr->car.carplate, input) == 0) //found the location
+            {
+                break;
+            }
+            else
+            {
+                previousptr=currentptr;//save the previous current address
+                currentptr=currentptr->ptrnext; //point to next node
+            }
+
+        }
+
+        if (strcmp(currentptr->car.carplate, input) == 0)
+        {
+            if (currentptr==headptr) //number is the first and only node in list
+            {
+                headptr=currentptr ->ptrnext; //head point to NULL
+                free(currentptr);
+            }
+            else //delete at the middle of link list
+            {
+                previousptr->ptrnext=currentptr->ptrnext;//previous node point to next node
+                free(currentptr);//destroy  node, free the memory.
+            }
+        }
+
+        else
+            printf("\nNumber to be deleted is not in the list!!! ");
+
+
+    }
+
+}
+
+//delete the beginning record
+void delete_beginning(){
+
+	if (headptr==NULL){
+    printf("\n\nThe list is empty. Cannot delete!!!\n");}
+
+	else{
+      currentptr=headptr;//current contain the address of first node
+      headptr=headptr->ptrnext;;//head point to second previous node
+      free(currentptr);//destroy first node, free the memory.
+	}
+}
+
+//dequeue the beginning record of repair struct
+int dequeueRepair(int count){
+	int r;
+    if (count==0)//node is empty?
+    {
+        printf("\n\nThe list is empty. Cannot delete!!!\n");//the list is empty
+    }
+
+    else
+    {
+    	for(r=0;r<count;r++){
+    		repair[r]=repair[r+1];
+		}
+		count=count-1;
+		printf("\nDequeue successful!\n");
+    }
+    return count;
+}
+
+//searching record by car plate
+void search_bycarplate(){
+
+    char searchValue[20];
+
+    if (headptr==NULL){
+        printf("\n\nThe list is empty!!!\n");}
+    else{
+      printf("\nEnter car plate to search: ");
+      scanf("%s",&searchValue);
+
+    currentptr=headptr;
+
+    while(currentptr->ptrnext!=NULL){
+
+        if (strcmp(currentptr->car.carplate, searchValue)==0){
+
+            printf("\nCar Plate %s is found\n", searchValue);
+            fflush(stdin);
+            printf("Client Name: %s\n", currentptr->client.clientname);
+            printf("Client IC: %s\n", currentptr->client.clientIC);
+            printf("Phone Number: %s\n", currentptr->client.phoneNum);
+            printf("Car Plate: %s\n", currentptr->car.carplate);
+            printf("Car Model: %s\n", currentptr->car.carmodel);
+            printf("Car Make: %s\n", currentptr->car.carmake);
+            printf("Car Price: %.2f\n", currentptr->car.carprice);
+            fflush(stdin);
+            printf("Car Mileage: %d\n", currentptr->car.carmileage);
+            fflush(stdin);
+
+            return;}
+        else{
+          currentptr=currentptr->ptrnext;}
+		}
+
+    if(strcmp(currentptr->car.carplate, searchValue)==0){
+
+        printf("\nCar Plate %s is found", searchValue);
+        fflush(stdin);
+        printf("Client Name: %s\n", currentptr->client.clientname);
+        printf("Client IC: %s\n", currentptr->client.clientIC);
+        printf("Phone Number: %s\n", currentptr->client.phoneNum);
+        printf("Car Plate: %s\n", currentptr->car.carplate);
+        printf("Car Model: %s\n", currentptr->car.carmodel);
+        printf("Car Make: %s\n", currentptr->car.carmake);
+        printf("Car Price: %.2f\n", currentptr->car.carprice);
+        fflush(stdin);
+        printf("Car Mileage: %d\n", currentptr->car.carmileage);
+        fflush(stdin);}
+
+    else{
+    	printf("\nCar Plate is not in the list!!! ");
+	}
+        }
+}
+
+//convert linked list to array
+void linkedlist_to_array(struct Asset *head, struct ArrayStore *store)
+{
+    int count = 0;
+    int i;
+    struct Asset *current = head;
+
+    // Count the number of nodes in the linked list
+    while (current != NULL)
+    {
+        count++;
+        current = current->ptrnext;
+    }
+
+    // Allocate memory for the array of structures in ArrayStore
+    store->array = (struct Asset *)malloc(count * sizeof(struct Asset));
+    if (store->array == NULL)
+    {
+        printf("Memory allocation error\n");
+        exit(EXIT_FAILURE);
+    }
+
+    // Transfer data from the linked list to the ArrayStore
+    current = head;
+    for (i = 0; i < count; i++)
+    {
+        store->array[i] = *current;
+        current = current->ptrnext;
+    }
+
+    // Set the size in ArrayStore
+    store->size = count;
+}
+
+//bubble sorting by price
+void bubble_sort_price(struct ArrayStore *store)
+{
+    int i;
+    int originalSize = store->size;
+
+    while (store->size > 1)
+    {
+        store->size--;
+
+        for (i = 0; i < store->size; i++)
+        {
+            if (store->array[i].car.carprice > store->array[i + 1].car.carprice)
+            {
+                // Swap entire structures
+                struct Asset temp;
+                temp = store->array[i];
+                store->array[i] = store->array[i + 1];
+                store->array[i + 1] = temp;
+            }
+        }
+    }
+    store->size = originalSize;
+}
+
+//bubble sorting by mileage
+void bubble_sort_mileage(struct ArrayStore *store)
+{
+    int i;
+    int originalSize = store->size;
+
+    while (store->size > 1)
+    {
+        store->size--;
+
+        for (i = 0; i < store->size; i++)
+        {
+            if (store->array[i].car.carmileage > store->array[i + 1].car.carmileage)
+            {
+                // Swap entire structures
+                struct Asset temp;
+                temp = store->array[i];
+                store->array[i] = store->array[i + 1];
+                store->array[i + 1] = temp;
+            }
+        }
+    }
+    store->size = originalSize;
+}
+
+
+void display_array(struct ArrayStore *store)
+{
+	int i;
+    if (store->size == 0)
+    {
+        printf("\nEmpty array\n");
+        return;
+    }
+
+
+    // Display the array contents
+    for (i = 0; i < store->size; i++)
+    {
+        printf("\n%d\t%-12s\t%-12s\t%-12s\t%-10s\t%-10s\t%-10s\tRM%.2f\t%d km\n",
+               i + 1, store->array[i].client.clientname,store->array[i].client.clientIC,store->array[i].client.phoneNum, store->array[i].car.carplate,
+               store->array[i].car.carmodel,
+               store->array[i].car.carmake, store->array[i].car.carprice, store->array[i].car.carmileage);
+    }
+}
+
+void list_sort()
+{
+    if (headptr==(struct Asset*)NULL) //empty list
+    {
+        printf("\nEmpty list");
+        return;
+    }
+
+
+    currentptr=headptr;
+
+    struct ArrayStore finalarray;
+    linkedlist_to_array(headptr, &finalarray);
+
+    int input;
+    printf("Sort by:\n"
+           "1 - Car Price\n"
+           "2 - Car Mileage\n"
+           "Enter choice: ");
+    scanf("%d",&input);
+    fflush(stdin);
+
+    if(input == 1)
+    {
+        bubble_sort_price(&finalarray);
+        printf("The records have been sorted by car price.");
+    }
+    else if (input == 2)
+    {
+        bubble_sort_mileage(&finalarray);
+        printf("The records have been sorted by car mileage.");
+    }
+    else
+    {
+        printf("Invalid input.");
+        return;
+
+    }
+
+
+    printf("\n");
+    printf("\nNo.   Client Name\tClient IC\tPhone Number\tCar Plate\tCar Model\tCar Make\tCar Price\tCar Mileage\n");
+
+    display_array(&finalarray);
+
+    free(finalarray.array);
+}
+
+//register repair and maintenance
+void repairRegister(){
+	char repairRegister[20];
+	char dequeueRegister[20];
+	int i;
+	int count=0;
+	char repairDate [20];
+	char repairDetails [30];
+	char ans;
+
+    if (headptr==NULL){
+        printf("\n\nThe list is empty!!!\n");
+		}
+
+    else{
+    label1:{
+    fflush(stdin);
+      printf("\nEnter car plate to register repair and maintenance: ");
+      scanf("%s",&repairRegister);
+      printf("\nEnter date of service (in DD-MM-YYYY): ");
+      scanf("%s",&repairDate);
+      printf("\nEnter repair details: ");
+      scanf("%s",&repairDetails);
+
+
+    currentptr=headptr;
+
+    	while(currentptr->ptrnext!=NULL){
+
+        	if (strcmp(currentptr->car.carplate, repairRegister)==0){
+        		printf("The repair and maintenance registration is successful!\n");
+        		strcpy(repair[i].rpClientname,currentptr->client.clientname);
+        		strcpy(repair[i].rpCarplate,currentptr->car.carplate);
+        		strcpy(repair[i].rpCarmake,currentptr->car.carmake);
+        		strcpy(repair[i].rpCarmodel,currentptr->car.carmodel);
+        		strcpy(repair[i].Date_of_Service,repairDate);
+        		strcpy(repair[i].Repair_Details,repairDetails);
+        		fflush(stdin);
+        		i=i+1;
+        		count=count+1;
+            	goto label2;
+			}
+        	else{
+          	currentptr=currentptr->ptrnext;
+		  	}
+		}
+
+        if (strcmp(currentptr->car.carplate, repairRegister)==0){
+        		printf("The repair and maintenance registration is successful!\n");
+        		strcpy(repair[i].rpClientname,currentptr->client.clientname);
+        		strcpy(repair[i].rpCarplate,currentptr->car.carplate);
+        		strcpy(repair[i].rpCarmake,currentptr->car.carmake);
+        		strcpy(repair[i].rpCarmodel,currentptr->car.carmodel);
+        		strcpy(repair[i].Date_of_Service,repairDate);
+        		strcpy(repair[i].Repair_Details,repairDetails);
+        		fflush(stdin);
+        		i=i+1;
+        		count=count+1;
+            	goto label2;
+			}
+        else{
+          	currentptr=currentptr->ptrnext;}
+
+
+	}
+    	if(strcmp(currentptr->car.carplate, repairRegister)!=0){
+    		printf("\nCar Plate is not in the list!!! ");
+    	}
+	}
+		label2:{
+			fflush(stdin);
+    		printf("\nDo you want to register repair and maintenance for another car? (Y/N):");
+    		scanf("%c",&ans);
+    		switch(ans){
+    			case 'Y':
+				case 'y':goto label1;break;
+    			case 'N':
+				case 'n':goto label3;break;
+				default: printf("Invalid value!");goto label2;break;
+			}
+		}
+
+	label3:{
+		fflush(stdin);
+    	printf("\nDo you want to dequeue repair and maintenance from the list of car? (Y/N):");
+    	scanf("%c",&ans);
+    	switch(ans){
+    		case 'Y':
+			case 'y':count=dequeueRepair(count);goto label2;break;
+    		case 'N':
+			case 'n':goto label4;break;
+			default: printf("Invalid value!");goto label3;break;
+	}
+	}
+
+	label4:{
+	printf("\n");
+    printf("\nNo.\tClient Name\tCar Plate\tCar Make\tCar Model\tDate of Service\tRepair Details\n");
+	for (i=0;i<count;i++){
+		printf("%d.\t",(i+1));
+		printf("%s\t\t", repair[i].rpClientname);
+        printf("%s\t\t", repair[i].rpCarplate);
+        printf("%s\t\t", repair[i].rpCarmake);
+        printf("%s\t\t", repair[i].rpCarmodel);
+        printf("%s\t", repair[i].Date_of_Service);
+        printf("%s\n", repair[i].Repair_Details);
+	}
+	fflush(stdin);
+	return;
+	}
+}
+
+
+
+struct driver getinsurance(){
+
+    struct driver i;
+
+    fflush(stdin);
+    printf("\nEnter Insurance Provider: ");
+    scanf(" %[^\n]s", i.insurance_info.insuranceProvider);
+
+    printf("Enter Policy Number: ");
+    scanf("%s", &i.insurance_info.policyNumber);
+
+    printf("Enter Coverage Amount: ");
+    scanf("%f", &i.insurance_info.coverageAmount);
+
+
+    return i;
+
+}
+
+struct driver getDriverInfo() {
+
+    struct driver d;
+
+    fflush(stdin);
+    printf("Enter Driver Name: ");
+    scanf(" %[^\n]s", d.driver_info.driverName);
+
+    printf("Enter Driver License: ");
+    scanf("%s", &d.driver_info.driverLicense);
+
+    printf("Enter Driver Age: ");
+    scanf("%d", &d.driver_info.age);
+
+    return d;
+}
+
+void Info(){
+
+    struct driver insurance = getinsurance();
+    struct driver driverInfo = getDriverInfo();
+
+    fflush(stdin);
+    printf("\nDetails:\n");
+    display(insurance, driverInfo);
+}
+
+
+
+void display(struct driver insurance, struct driver driverInfo) {
+    fflush(stdin);
+    printf("\nInsurance Provider: %s\n", insurance.insurance_info.insuranceProvider);
+    printf("Policy Number: %s\n", insurance.insurance_info.policyNumber);
+    printf("Coverage Amount: RM%.2f\n", insurance.insurance_info.coverageAmount);
+    printf("Driver Name: %s\n", driverInfo.driver_info.driverName);
+    printf("Driver License: %s\n", driverInfo.driver_info.driverLicense);
+    printf("Driver Age: %d\n", driverInfo.driver_info.age);
+}
+
+
